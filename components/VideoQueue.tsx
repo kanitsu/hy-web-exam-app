@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Motion } from '@legendapp/motion';
 import { Video, ResizeMode } from 'expo-av';
-import { Directions, Gesture, GestureDetector, FlingGestureHandler } from 'react-native-gesture-handler';
+import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { ProgressBar } from './ProgressBar';
 
 
 export function VideoQueue(): JSX.Element {
     const video = React.useRef(null);
-    const [playing, setPlaying] = useState(false);
     const [position, setPosition] = useState(0);
     const [status, setStatus] = useState<number[]>([]);
     const urls = [
@@ -33,41 +33,46 @@ export function VideoQueue(): JSX.Element {
 
     const handlePlaybackStatusUpdate = (index: number) => (state) => {
         const newStatus = [...status];
-        newStatus[index] = state.positionMillis / state.playableDurationMillis;
+        newStatus[index] = state.positionMillis * 100.0 / state.playableDurationMillis;
         setStatus(newStatus);
     }
 
     return (
-        <GestureDetector gesture={swipeUp}>
-            <GestureDetector gesture={swipeDown}>
-                <View style={styles.column}>
-                    {urls.map((uri, index) => (
-                        <Motion.View style={styles.inner}
-                            key={index}
-                            animate={{
-                                y: (index - position) * 896,
-                            }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 260,
-                                damping: 20,
-                            }}>
-                            <Video
-                                ref={video}
-                                style={styles.video}
-                                source={{ uri }}
-                                useNativeControls={false}
-                                shouldPlay={index == position}
-                                isLooping={true}
-                                resizeMode={ResizeMode.COVER}
-                                onPlaybackStatusUpdate={handlePlaybackStatusUpdate(index)}
-                            />
-
-                        </Motion.View>
-                    ))}
-                </View>
+        <>
+            <GestureDetector gesture={swipeUp}>
+                <GestureDetector gesture={swipeDown}>
+                    <View style={styles.column}>
+                        {urls.map((uri, index) => (
+                            <Motion.View style={styles.inner}
+                                key={index}
+                                animate={{
+                                    y: (index - position) * 896,
+                                }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 260,
+                                    damping: 20,
+                                }}>
+                                <Video
+                                    ref={video}
+                                    style={styles.video}
+                                    source={{ uri }}
+                                    useNativeControls={false}
+                                    shouldPlay={index == position}
+                                    isLooping={true}
+                                    resizeMode={ResizeMode.COVER}
+                                    onPlaybackStatusUpdate={handlePlaybackStatusUpdate(index)}
+                                />
+                                <Motion.View style={styles.inner}>
+                                    <Text>Hahaahaha Test hehehe</Text>
+                                </Motion.View>
+                            </Motion.View>
+                        ))}
+                    </View>
+                </GestureDetector>
             </GestureDetector>
-        </GestureDetector>
+            <ProgressBar progress={status[position]} />
+        </>
     );
 }
 
