@@ -4,6 +4,7 @@ import { Motion } from '@legendapp/motion';
 import { Video, ResizeMode } from 'expo-av';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { ProgressBar } from './ProgressBar';
+import MarqueeText from 'react-native-marquee';
 
 
 export function VideoQueue(): JSX.Element {
@@ -63,15 +64,21 @@ export function VideoQueue(): JSX.Element {
                                     resizeMode={ResizeMode.COVER}
                                     onPlaybackStatusUpdate={handlePlaybackStatusUpdate(index)}
                                 />
-                                <Motion.View style={styles.inner}>
-                                    <Text>Hahaahaha Test hehehe</Text>
-                                </Motion.View>
                             </Motion.View>
                         ))}
                     </View>
                 </GestureDetector>
             </GestureDetector>
             <ProgressBar progress={status[position]} />
+            <View style={styles.marqueeContainer}>
+                <MarqueeText
+                    style={styles.marquee}
+                    speed={0.5}
+                    marqueeOnStart={true}
+                    loop={true}
+                    delay={1000}
+                >Lorem Ipsum is simply dummy text of the printing and typesetting industry and typesetting industry.</MarqueeText>
+            </View>
         </>
     );
 }
@@ -93,5 +100,16 @@ const styles = StyleSheet.create({
         width: 414,
         height: 896,
         overflow: 'hidden',
+    },
+    marqueeContainer: {
+        position: 'absolute',
+        bottom: 75,
+        left: 10,
+        justifyContent: 'center',
+        width: '60%',
+    },
+    marquee: {
+        color: '#fff',
+        fontSize: 15,
     },
 });
