@@ -5,7 +5,6 @@ import { useGetVideoData } from './hooks/useGetVideoData';
 
 export function Home(): JSX.Element {
     const [active, setActive] = useState(0);
-    const [buffering, setBuffering] = useState(false);
 
     const { loadInfo, data, loading, error } = useGetVideoData();
 
