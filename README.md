@@ -20,6 +20,8 @@ Alternatively, if metro is still running, you can also run the app from "Expo Go
 exp://localhos:19000 
 ```
 
+<img width="250" alt="image" src="https://raw.githubusercontent.com/kanitsu/hy-web-exam-app/main/assets/run.png" />
+
 ## Environment
 
 1. Node v19.8.1
@@ -28,3 +30,11 @@ exp://localhos:19000
 ## Troubleshoting
 
 1. Make sure that backend server is running and accessible at `localhost` port `3000`.
+2. Changing and saving codes doesn't do anything to the app. If the error message in the bottom (as shown in the image below)
+
+<img width="250" alt="image" src="https://raw.githubusercontent.com/kanitsu/hy-web-exam-app/main/assets/disconnected.png" />
+
+This might be caused by:
+- metro not running or metro is shutdown / restarted, or if connected through network, disconnected.
+- If metro not running, then restart metro by typing `npm run ios` again, and run the app through "Expo Go"
+- If metro is running, then type `r` in the terminal where metro runs.
