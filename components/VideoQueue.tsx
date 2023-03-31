@@ -1,27 +1,40 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Image, Pressable, ActivityIndicator } from 'react-native';
 import { Motion } from '@legendapp/motion';
 import { Video, ResizeMode } from 'expo-av';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { ProgressBar } from './ProgressBar';
 import MarqueeText from 'react-native-marquee';
+import Toast from 'react-native-root-toast';
 
-
-export function VideoQueue(): JSX.Element {
+interface VideoInfo {
+    "cover": string;
+    "play_url": string;
+    "title": string;
+};
+interface VideoState {
+    progress: number;
+    isBuffering: boolean;
+};
+interface Props {
+    videoInfos: VideoInfo[] | [];
+}
+export function VideoQueue({ videoInfos }: Props): JSX.Element {
     const video = React.useRef(null);
     const [position, setPosition] = useState(0);
-    const [status, setStatus] = useState<number[]>([]);
-    const urls = [
-        'http://localhost:3000/media/Volkswagen_Golf_7.m3u8',
-        'http://localhost:3000/media/Toyota_Camry_XV70.m3u8',
-        'http://localhost:3000/media/Rolls_Royce_Ghost.m3u8',
-    ];
+    const [status, setStatus] = useState<VideoState[]>([]);
 
     const swipeUp = Gesture.Fling()
         .direction(Directions.UP)
         .onEnd(() => {
-            if (position < urls.length - 1) {
+            if (position < videoInfos.length - 1) {
                 setPosition(position + 1);
+            }
+            else {
+                Toast.show('No more newer video.', {
+                    duration: Toast.durations.SHORT,
+                    position: Toast.positions.CENTER,
+                });
             }
         });
     const swipeDown = Gesture.Fling()
@@ -30,12 +43,23 @@ export function VideoQueue(): JSX.Element {
             if (position > 0) {
                 setPosition(position - 1);
             }
+            else {
+                Toast.show('No more older video.', {
+                    duration: Toast.durations.SHORT,
+                    position: Toast.positions.CENTER,
+                });
+            }
         });
 
     const handlePlaybackStatusUpdate = (index: number) => (state) => {
+        //console.log(index, state);
         const newStatus = [...status];
-        newStatus[index] = state.positionMillis * 100.0 / state.playableDurationMillis;
+        newStatus[index] = { progress: state.positionMillis * 100.0 / state.playableDurationMillis, isBuffering: state.isBuffering };
         setStatus(newStatus);
+    }
+
+    if (!videoInfos || videoInfos.length < 1) {
+        return <></>;
     }
 
     return (
@@ -43,7 +67,7 @@ export function VideoQueue(): JSX.Element {
             <GestureDetector gesture={swipeUp}>
                 <GestureDetector gesture={swipeDown}>
                     <View style={styles.column}>
-                        {urls.map((uri, index) => (
+                        {videoInfos.map((info, index) => (
                             <Motion.View style={styles.inner}
                                 key={index}
                                 animate={{
@@ -57,7 +81,7 @@ export function VideoQueue(): JSX.Element {
                                 <Video
                                     ref={video}
                                     style={styles.video}
-                                    source={{ uri }}
+                                    source={{ uri: info.play_url }}
                                     useNativeControls={false}
                                     shouldPlay={index == position}
                                     isLooping={true}
@@ -69,16 +93,17 @@ export function VideoQueue(): JSX.Element {
                     </View>
                 </GestureDetector>
             </GestureDetector>
-            <ProgressBar progress={status[position]} />
+            <ProgressBar progress={status[position] ? status[position].progress : 0} />
             <View style={styles.marqueeContainer}>
                 <MarqueeText
                     style={styles.marquee}
-                    speed={0.5}
+                    speed={0.2}
                     marqueeOnStart={true}
                     loop={true}
                     delay={1000}
-                >Lorem Ipsum is simply dummy text of the printing and typesetting industry and typesetting industry.</MarqueeText>
+                >{`${videoInfos[position].title} ${videoInfos[position].cover} ${videoInfos[position].play_url}`}</MarqueeText>
             </View>
+            {(!status || !status[position] || status[position].isBuffering) && <ActivityIndicator size='large' />}
         </>
     );
 }
